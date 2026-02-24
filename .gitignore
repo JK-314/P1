@@ -1,0 +1,57 @@
+# Flutter/Dart
+*.dart_tool/
+.packages
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+pubspec.lock
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# macOS
+.DS_Store
+
+# Android
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+
+# iOS
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/DerivedData/
+**/ios/.symlinks/
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/Flutter/App.framework
+**/ios/**/Flutter/Flutter.framework
+**/ios/**/Flutter/Flutter.podspec
+**/ios/**/Flutter/Generated.xcconfig
+**/ios/**/Flutter/ephemeral/
+**/ios/**/Flutter/flutter_export_environment.sh
+
+# Environment
+.env
+.env.*
+
+# Coverage
+coverage/
