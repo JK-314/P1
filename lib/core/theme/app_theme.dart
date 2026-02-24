@@ -1,5 +1,24 @@
 import 'package:flutter/material.dart';
 
+class FoodFeedColors {
+  FoodFeedColors._();
+
+  static const deepGreen = Color(0xFF2D5A3D);
+  static const deepGreenLight = Color(0xFF3A7350);
+  static const deepGreenSoft = Color(0xFF4A8C63);
+  static const offWhite = Color(0xFFF8F6F2);
+  static const warmWhite = Color(0xFFFAF9F6);
+  static const cream = Color(0xFFF3EDE4);
+  static const warmGray = Color(0xFF8C8478);
+  static const darkText = Color(0xFF2C2A26);
+  static const mutedText = Color(0xFF6B665E);
+  static const tagBg = Color(0xFFE8F0E6);
+  static const tagText = Color(0xFF3A6B4A);
+  static const accentAmber = Color(0xFFD4A853);
+  static const timelineLine = Color(0xFFD4CEC4);
+  static const timelineDot = Color(0xFF3A7350);
+}
+
 class AppTheme {
   AppTheme._();
 
