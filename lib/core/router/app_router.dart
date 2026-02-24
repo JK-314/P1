@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../features/persona/presentation/screens/discovery_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -11,9 +12,7 @@ GoRouter appRouter(Ref ref) {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Eatsence')),
-        ),
+        builder: (context, state) => const DiscoveryScreen(),
       ),
     ],
   );
