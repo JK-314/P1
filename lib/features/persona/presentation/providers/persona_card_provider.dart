@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/models/persona_card.dart';
+import '../../domain/models/user_profile.dart';
 
 part 'persona_card_provider.g.dart';
 
@@ -26,6 +27,35 @@ class PersonaCardList extends _$PersonaCardList {
         return card;
       }).toList(),
     );
+  }
+
+  /// 매칭을 최종 확정하고 실제 프로필을 연결한다.
+  /// 서버에서 UserProfile을 받아온 뒤 해당 카드의 isFinalMatched를 true로 전환.
+  Future<void> finalizeMatch(String cardId, UserProfile profile) async {
+    final current = state.valueOrNull;
+    if (current == null) return;
+
+    state = AsyncData(
+      current.map((card) {
+        if (card.id == cardId) {
+          return card.copyWith(
+            isFinalMatched: true,
+            userProfile: profile,
+          );
+        }
+        return card;
+      }).toList(),
+    );
+  }
+
+  /// 매칭 확정된 카드의 실제 프로필을 조회한다.
+  /// isFinalMatched == false인 카드는 null을 반환.
+  UserProfile? getRevealedProfile(String cardId) {
+    final current = state.valueOrNull;
+    if (current == null) return null;
+
+    final card = current.where((c) => c.id == cardId).firstOrNull;
+    return card?.revealedProfile;
   }
 }
 
