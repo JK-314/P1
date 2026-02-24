@@ -1,0 +1,206 @@
+# Eatsence Project Rules
+
+## Project Overview
+Eatsence is a Flutter-based social matching application built on a **3-Step Bridge Matching System**.
+The core philosophy is anonymous persona-based matching — users connect through shared values
+and lifestyle compatibility, not superficial attributes.
+
+---
+
+## Tech Stack
+
+- **Framework:** Flutter (latest stable)
+- **State Management:** Riverpod (flutter_riverpod) — use `Notifier` / `AsyncNotifier` patterns exclusively
+- **Backend:** Supabase (authentication, database, realtime, storage)
+- **UI Style:** Material 3 (Material Design 3), Clean & Minimalist
+- **Routing:** go_router
+- **Code Generation:** freezed, json_serializable, riverpod_generator (build_runner)
+
+---
+
+## Architecture: Clean Architecture
+
+All code under `lib/` follows a strict 3-layer Clean Architecture:
+
+```
+lib/
+├── core/               # Shared utilities, constants, theme, extensions
+│   ├── constants/
+│   ├── extensions/
+│   ├── theme/
+│   ├── utils/
+│   └── router/
+├── features/           # Feature modules (each follows the 3-layer pattern)
+│   └── <feature_name>/
+│       ├── presentation/   # UI layer (screens, widgets, providers)
+│       │   ├── screens/
+│       │   ├── widgets/
+│       │   └── providers/
+│       ├── domain/         # Business logic layer (entities, usecases)
+│       │   ├── entities/
+│       │   └── usecases/
+│       └── data/           # Data layer (models, repositories, datasources)
+│           ├── models/
+│           ├── repositories/
+│           └── datasources/
+└── main.dart
+```
+
+### Layer Rules
+- **Presentation** depends on **Domain** only (never directly on Data).
+- **Domain** has zero dependencies on other layers — it is pure Dart.
+- **Data** implements interfaces defined in **Domain**.
+- Cross-feature communication goes through Domain-layer abstractions.
+
+---
+
+## 3-Step Bridge Matching System
+
+### Step 1: Persona Profile (페르소나 프로필)
+- **Rule: 완전 익명성 유지. 개인 신상(이름, 나이, 사진) 절대 노출 금지.**
+- Users create an anonymous persona — no real name, age, or photo is ever shown.
+- Identity is expressed solely through persona categories (see below).
+- All UI in Step 1 must enforce anonymity; never request or display personal identifiers.
+
+### Step 2: Bridge Matching (브릿지 매칭)
+- System matches users based on persona compatibility scores.
+- Matching algorithm weighs category alignment across all 4 persona dimensions.
+- Partial reveals happen incrementally to build trust.
+
+### Step 3: Connection (커넥션)
+- Mutual consent required before any further identity sharing.
+- Gradual reveal mechanism — users control what they disclose and when.
+
+### Persona Categories (페르소나 카테고리)
+1. **경제력 (Economic Capacity)** — spending habits, financial goals, lifestyle tier
+2. **건강 (Health)** — fitness habits, dietary preferences, wellness priorities
+3. **생활 리듬 (Life Rhythm)** — daily routines, sleep schedule, work-life balance
+4. **가치관/철학 (Values & Philosophy)** — beliefs, relationship values, life priorities
+
+---
+
+## State Management Rules (Riverpod)
+
+### Provider Patterns
+- Use `@riverpod` annotation (riverpod_generator) for all providers.
+- Prefer `Notifier` for synchronous state, `AsyncNotifier` for async state.
+- Never use legacy `StateNotifier` or `ChangeNotifier`.
+- Keep providers scoped to their feature module under `features/<name>/presentation/providers/`.
+
+### Naming Conventions
+- Provider files: `<name>_provider.dart`
+- Notifier classes: `<Name>Notifier`
+- Generated providers are auto-named by riverpod_generator.
+
+### Example Pattern
+```dart
+@riverpod
+class PersonaProfile extends _$PersonaProfile {
+  @override
+  FutureOr<PersonaEntity> build() async {
+    return ref.read(getPersonaUseCaseProvider).execute();
+  }
+
+  Future<void> updateCategory(PersonaCategory category, dynamic value) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() =>
+      ref.read(updatePersonaUseCaseProvider).execute(category, value),
+    );
+  }
+}
+```
+
+---
+
+## Supabase Integration Rules
+
+- All Supabase calls live in the **Data** layer (`datasources/`).
+- Use `SupabaseClient` injected via a Riverpod provider — never instantiate directly.
+- Row Level Security (RLS) must be enabled on all tables.
+- Realtime subscriptions are managed through dedicated datasource classes.
+- Auth state is managed via a global `authStateProvider`.
+
+### Supabase Provider
+```dart
+@Riverpod(keepAlive: true)
+SupabaseClient supabaseClient(Ref ref) {
+  return Supabase.instance.client;
+}
+```
+
+---
+
+## UI / Design Rules
+
+### Material 3
+- Use `useMaterial3: true` in `ThemeData`.
+- Leverage Material 3 components: `FilledButton`, `OutlinedButton`, `SearchBar`, `NavigationBar`, etc.
+- Use `ColorScheme.fromSeed()` for consistent theming.
+- Support both light and dark themes.
+
+### Style Principles
+- **Clean & Minimalist** — generous whitespace, clear typography hierarchy, no visual clutter.
+- Use `SizedBox` for spacing (not `Padding` with all-side values).
+- Consistent border radius: 12.0 for cards, 8.0 for inputs, 24.0 for bottom sheets.
+- Elevation: keep minimal (0-2 for cards, 0 for app bar in most screens).
+
+### Responsive Design
+- Use `LayoutBuilder` or `MediaQuery` for responsive layouts.
+- Design mobile-first; tablet layouts are secondary.
+
+---
+
+## Coding Conventions
+
+### Dart Style
+- Follow official Dart style guide (`dart format`).
+- Use `const` constructors wherever possible.
+- Prefer `final` over `var` for local variables.
+- Use named parameters for constructors with 2+ parameters.
+- Use `freezed` for all domain entities and data models.
+
+### File Naming
+- Snake_case for all file names: `persona_profile_screen.dart`
+- One public class/widget per file.
+- Private helpers can coexist in the same file.
+
+### Import Order
+1. Dart SDK imports
+2. Flutter imports
+3. Package imports
+4. Project imports (relative within feature, package-style across features)
+
+### Error Handling
+- Use `Either<Failure, T>` pattern (from dartz or fpdart) for usecase return types.
+- Define a `Failure` sealed class hierarchy in `core/`.
+- Never let exceptions propagate to the presentation layer unhandled.
+- `AsyncValue` in Riverpod handles loading/error/data states in UI.
+
+---
+
+## Testing Guidelines
+
+- Unit tests for all usecases and notifiers.
+- Widget tests for critical UI flows.
+- Integration tests for the matching flow.
+- Use `mocktail` for mocking dependencies.
+- Test files mirror `lib/` structure under `test/`.
+
+---
+
+## Git Conventions
+
+- Branch naming: `feature/<name>`, `fix/<name>`, `refactor/<name>`
+- Commit messages: conventional commits (`feat:`, `fix:`, `refactor:`, `docs:`, `test:`)
+- Keep commits atomic — one logical change per commit.
+
+---
+
+## Key Reminders
+
+1. **Anonymity is sacred in Step 1.** Never expose or store personal identifiers in persona-related code.
+2. **Riverpod only** — no Provider, Bloc, GetX, or other state management.
+3. **Clean Architecture boundaries are strict** — presentation never imports from data.
+4. **Material 3 + Minimalist UI** — every screen should feel spacious and focused.
+5. **Korean language support** — the app targets Korean users; ensure proper localization setup.
+6. **Supabase RLS** — always verify Row Level Security policies before adding new tables.
