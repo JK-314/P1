@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../matching/presentation/providers/match_provider.dart';
 import '../providers/persona_card_provider.dart';
 import '../widgets/persona_card_widget.dart';
 
@@ -82,6 +83,11 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
                           ref
                               .read(personaCardListProvider.notifier)
                               .toggleLike(cards[index].id);
+                          if (!cards[index].isLiked) {
+                            ref
+                                .read(matchProvider.notifier)
+                                .simulateMatch(cards[index].id);
+                          }
                         },
                       ),
                     );
