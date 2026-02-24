@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/models/food_feed_entry.dart';
@@ -246,10 +247,13 @@ class _FeedContent extends ConsumerWidget {
           child: _MatchingRequestButton(
             isLoading: matchingState is AsyncLoading,
             isCompleted: matchingState.valueOrNull == true,
-            onPressed: () {
-              ref
+            onPressed: () async {
+              await ref
                   .read(matchingRequestProvider.notifier)
                   .requestMatching(personaId);
+              if (context.mounted) {
+                context.push('/identity-reveal/$personaId');
+              }
             },
           ),
         ),
